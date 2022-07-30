@@ -21,7 +21,7 @@ const fetchDataFailed = (payload) => {
   };
 };
 
-export const fetchData = () => {
+export const fetchData = (account) => {
   return async (dispatch) => {
     dispatch(fetchDataRequest());
     try {
@@ -29,7 +29,20 @@ export const fetchData = () => {
         .getState()
         .blockchain.smartContract.methods.totalSupply()
         .call();
-      // let cost = await store
+        let wlSaleStart_A = await store
+        .getState()
+        .blockchain.smartContract.methods.wlSaleStart_A()
+        .call();
+        let wlSaleStart_B = await store
+        .getState()
+        .blockchain.smartContract.methods.wlSaleStart_B()
+        .call();
+        let saleStart = await store
+        .getState()
+        .blockchain.smartContract.methods.saleStart()
+        .call();
+
+        // let cost = await store
       //   .getState()
       //   .blockchain.smartContract.methods.cost()
       //   .call();
@@ -37,6 +50,9 @@ export const fetchData = () => {
       dispatch(
         fetchDataSuccess({
           totalSupply,
+          wlSaleStart_A,
+          wlSaleStart_B,
+          saleStart,
           // cost,
         })
       );
