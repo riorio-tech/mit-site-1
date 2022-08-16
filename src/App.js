@@ -4,6 +4,7 @@ import { connect } from "./redux/blockchain/blockchainActions";
 import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
+import { AudioPlayer } from "./AudioPlayer";
 
 const truncate = (input, len) =>
   input.length > len ? `${input.substring(0, len)}...` : input;
@@ -449,6 +450,7 @@ function App() {
               boxShadow: "0px 5px 11px 2px rgba(0,0,0,0.7)",
             }}
           >
+            <AudioPlayer></AudioPlayer>
             <s.TextTitle
               style={{
                 textAlign: "center",
@@ -470,6 +472,7 @@ function App() {
               </StyledLink>
             </s.TextDescription>
             <s.SpacerSmall />
+
             {Number(data.totalSupply) >= CONFIG.MAX_SUPPLY ? (
               <>
                 <s.TextTitle
