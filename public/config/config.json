@@ -1,18 +1,20 @@
 {
-  "CONTRACT_ADDRESS": "0x25A7558dC1f7d17E8936Ffb5669B41bDd5a814Ca",
-  "SCAN_LINK": "https://rinkeby.etherscan.io/address/0x25a7558dc1f7d17e8936ffb5669b41bdd5a814ca",
+  "CONTRACT_ADDRESS": "0xa8c4bdfdb0b899da3e0013e29d7fabbe03a33a55",
+  "SCAN_LINK": "https://polygonscan.com/address/0xa8c4bdfdb0b899da3e0013e29d7fabbe03a33a55",
   "NETWORK": {
-    "NAME": "rinkeby",
-    "SYMBOL": "ETH",
-    "ID": 4
+    "NAME": "Polygon",
+    "SYMBOL": "Matic",
+    "ID": 137
   },
-  "NFT_NAME": "Nerdy Coder Clones",
-  "SYMBOL": "NCC",
-  "MAX_SUPPLY": 1000,
-  "WEI_COST": 75000000000000000,
-  "DISPLAY_COST": 0.075,
+  "NFT_NAME": "Welcome to Onikon",
+  "SYMBOL": "WTO",
+  "MAX_SUPPLY": 200,
+  "WEI_COSTB": 10000000000000000000,
+  "WEI_COST": 20000000000000000000,
+  "DISPLAY_COSTWLB": 10.0,
+  "DISPLAY_COST": 20.0,
   "GAS_LIMIT": 285000,
   "MARKETPLACE": "Opeansea",
-  "MARKETPLACE_LINK": "https://opensea.io/collection/nerdy-coder-clones",
+  "MARKETPLACE_LINK": "https://opensea.io/collection/welcometoonikon",
   "SHOW_BACKGROUND": true
 }

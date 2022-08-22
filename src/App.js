@@ -5,6 +5,8 @@ import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
 import { AudioPlayer } from "./AudioPlayer";
+import axios from 'axios';
+import fileDownload from 'js-file-download';
 
 const truncate = (input, len) =>
   input.length > len ? `${input.substring(0, len)}...` : input;
@@ -13,7 +15,7 @@ export const StyledButton = styled.button`
   padding: 10px;
   border-radius: 50px;
   border: none;
-  background-color: var(--button-bg);
+  background-color: orange;
   padding: 10px;
   font-weight: bold;
   color: var(--secondary-text);
@@ -90,6 +92,27 @@ export const StyledButtonPS = styled.button`
     -moz-box-shadow: none;
   }
 `;
+
+export const StyledButtonUnlock = styled.button`
+  padding: 10px;
+  border-radius: 50px;
+  border: none;
+  background-color: purple;
+  padding: 10px;
+  font-weight: bold;
+  color: var(--secondary-text);
+  width: 100px;
+  cursor: pointer;
+  box-shadow: 0px 6px 0px -2px rgba(250, 250, 250, 0.3);
+  -webkit-box-shadow: 0px 6px 0px -2px rgba(250, 250, 250, 0.3);
+  -moz-box-shadow: 0px 6px 0px -2px rgba(250, 250, 250, 0.3);
+  :active {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+  }
+`;
+
 export const StyledRoundButton = styled.button`
   padding: 10px;
   border-radius: 100%;
@@ -165,8 +188,9 @@ function App() {
   const blockchain = useSelector((state) => state.blockchain);
   const data = useSelector((state) => state.data);
   const [claimingNft, setClaimingNft] = useState(false);
-  const [feedback, setFeedback] = useState(`ミントボタンを押しておっさんを手に入れてね`);
+  const [feedback, setFeedback] = useState(`ミントボタンを押してWELCOME TO ONIKONを手に入れてね`);
   const [mintAmount, setMintAmount] = useState(1);
+  const [mintAmountB, setMintAmountB] = useState(1);
   const [minted, setminted] = useState(0);
   const [mintedWlA, setmintedWlA] = useState(0);
   const [mintedWlB, setmintedWlB] = useState(0);
@@ -186,19 +210,29 @@ function App() {
     MAX_SUPPLY: 1,
     WEI_COST: 0,
     DISPLAY_COST: 0,
+    DISPLAY_COSTWLB: 0,
     GAS_LIMIT: 0,
     MARKETPLACE: "",
     MARKETPLACE_LINK: "",
     SHOW_BACKGROUND: false,
   });
 
+  const handleClick = (url, filename) => {
+    alert("読むこむので少々お待ちください。");
+    axios.get(url, {
+      responseType: 'blob',
+    })
+    .then((res) => {
+      fileDownload(res.data, filename)
+    })
+  }
 
   const claimNFTsA = () => {
     let cost = 0;//価格を０に。0714(ふりっきー)
-    let amount = 2;
+    let amount = wlA;
     let gasLimit = CONFIG.GAS_LIMIT;
     let totalCostWei = String(cost * amount);//個数を２に固定0714(ふりっきー)
-    let totalGasLimit = String(gasLimit * amount);//個数を２に固定0714(ふりっきー)
+    let totalGasLimit = String(gasLimit * 1);//個数を２に固定0714(ふりっきー)
     console.log("Cost: ", totalCostWei);
     console.log("Gas limit: ", totalGasLimit);
     setFeedback(`${CONFIG.NFT_NAME}ミント中...`);
@@ -233,8 +267,8 @@ function App() {
 
 
   const claimNFTsB = () => {
-    let cost = 0;
-    let amount = 1;
+    let cost = CONFIG.WEI_COSTB;
+    let amount = mintAmountB;
     let gasLimit = CONFIG.GAS_LIMIT;
     let totalCostWei = String(cost * amount);//個数を１に固定0714(ふりっきー)
     let totalGasLimit = String(gasLimit * amount);//個数を1に固定0714(ふりっきー)
@@ -243,7 +277,7 @@ function App() {
     setFeedback(`${CONFIG.NFT_NAME}ミント中...`);
     setClaimingNft(true);
     blockchain.smartContract.methods
-    .FreeMintB(amount)
+    .mintB(amount)
     .send({
         gasLimit: String(totalGasLimit),
         to: CONFIG.CONTRACT_ADDRESS,
@@ -388,6 +422,26 @@ function App() {
     setMintAmount(newMintAmount);
   };
 
+
+
+
+  const decrementMintAmountB = () => {
+    let newMintAmount = mintAmount - 1;
+    if (newMintAmount < 1) {
+      newMintAmount = 1;
+    }
+    setMintAmountB(newMintAmount);
+  };
+
+  const incrementMintAmountB = () => {
+    let newMintAmount = mintAmount + 1;
+    if (newMintAmount > (2 - minted)) {
+      newMintAmount = 2 - minted;
+    }
+    setMintAmountB(newMintAmount);
+  };
+
+
   const getData = () => {
     if (blockchain.account !== "" && blockchain.smartContract !== null) {
       dispatch(fetchData(blockchain.account));
@@ -450,7 +504,6 @@ function App() {
               boxShadow: "0px 5px 11px 2px rgba(0,0,0,0.7)",
             }}
           >
-            <AudioPlayer></AudioPlayer>
             <s.TextTitle
               style={{
                 textAlign: "center",
@@ -459,6 +512,14 @@ function App() {
                 color: "var(--accent-text)",
               }}
             >
+                              <s.SpacerXSmall />
+                <s.TextDescription
+                  style={{ textAlign: "center", color: "var(--accent-text)" }}
+                >
+                      <AudioPlayer></AudioPlayer>
+                </s.TextDescription>
+
+
               {data.totalSupply} / {CONFIG.MAX_SUPPLY}
             </s.TextTitle>
             <s.TextDescription
@@ -472,7 +533,6 @@ function App() {
               </StyledLink>
             </s.TextDescription>
             <s.SpacerSmall />
-
             {Number(data.totalSupply) >= CONFIG.MAX_SUPPLY ? (
               <>
                 <s.TextTitle
@@ -495,10 +555,33 @@ function App() {
                 <s.TextTitle
                   style={{ textAlign: "center", color: "var(--accent-text)" }}
                 >
-                  1{CONFIG.NFT_NAME}作るのに {CONFIG.DISPLAY_COST}{" "}
-                  {CONFIG.NETWORK.SYMBOL}必要だよ.
+                  1 {CONFIG.SYMBOL} costs
                 </s.TextTitle>
                 <s.SpacerXSmall />
+
+                <s.TextTitle
+                  style={{ textAlign: "center", color: "var(--accent-text)" }}
+                >
+                  {"ホワイトリストB"}
+                </s.TextTitle>
+                <s.TextTitle
+                  style={{ textAlign: "center", color: "var(--accent-text)" }}
+                >
+                  {CONFIG.DISPLAY_COSTWLB}{CONFIG.NETWORK.SYMBOL}{"(Max 1mint)"}
+                </s.TextTitle>
+                <s.TextTitle
+                  style={{ textAlign: "center", color: "var(--accent-text)" }}
+                >
+                  {"パブリックセール"}
+                </s.TextTitle>
+                <s.TextTitle
+                  style={{ textAlign: "center", color: "var(--accent-text)" }}
+                >
+                  {CONFIG.DISPLAY_COST}{CONFIG.NETWORK.SYMBOL}{"(Max 2mint)"}
+                </s.TextTitle>
+                <s.SpacerXSmall />
+
+
                 <s.TextDescription
                   style={{ textAlign: "center", color: "var(--accent-text)" }}
                 >
@@ -567,26 +650,29 @@ function App() {
                     </s.Container>
                     <s.SpacerSmall /> */}
                     <s.Container>
-                    <s.Container ai={"center"} jc={"center"} fd={"row"}>
 
                       {/* Aここから */}
-                      {wlA ? (//Aホワイトリスト所有確認
+                      {wlA > 0 ? (//Aホワイトリスト所有確認
                         <>
-                                              {data.wlSaleStart_A ? (//セールA開始確認
+                          {data.wlSaleStart_A ? (//セールA開始確認
                          <>
-                        {mintedWlA >= 2 ? (//ミント済確認
+                        {mintedWlA >= wlA ? (//ミント済確認
                           <>
-                          <StyledButtonA
-                            disabled={1}//claimingNftPsがtrueなら disabledを表示させる。＝クリックできない
-                            onClick={(e) => {
-                              e.preventDefault();
-                            }}
-                          >
-                            {"A.mint 済" }
-                          </StyledButtonA>
+                          <s.Container ai={"center"} jc={"center"} fd={"row"}>
+                            <StyledButtonA
+                              disabled={1}//claimingNftPsがtrueなら disabledを表示させる。＝クリックできない
+                              onClick={(e) => {
+                                e.preventDefault();
+                              }}
+                            >
+                              {"A.mint 済" }
+                            </StyledButtonA>
+                          </s.Container>
+
                           </>
                         ):(
                           <>
+                          <s.Container ai={"center"} jc={"center"} fd={"row"}>
                           <StyledButtonA
                             disabled={claimingNft ? 1:  0}//claimingNftPsがtrueなら disabledを表示させる。＝クリックできない
                             onClick={(e) => {
@@ -597,20 +683,33 @@ function App() {
                           >
                             {claimingNft ? "生産中" : "freeミント A"}
                           </StyledButtonA>
+                          </s.Container>
                           </>                      
                             )}
                          </>
                       ) : (
                       <>
+                        <s.Container ai={"center"} jc={"center"} fd={"row"}>
 
                       <s.TextDescription
                           style={{
                             color: "var(--accent-text)",
                           }}
                         >
-                        {"FREE_A.ComingSoon."}
+                        {"WL_Aに登録されています。"}
                         </s.TextDescription>
+                        </s.Container>
 
+                        <s.Container ai={"center"} jc={"center"} fd={"row"}>
+
+                        <s.TextDescription
+                          style={{
+                            color: "var(--accent-text)",
+                          }}
+                        >
+                        {"ComingSoon."}
+                        </s.TextDescription>
+                          </s.Container>
                       </>
                       )
                       }
@@ -621,13 +720,17 @@ function App() {
                       }
                       {/* Aここまで */}
 
+                      <s.Container>
                       {/* Bここから */}
-                      {wlB ? (//Bホワイトリスト所有確認
+                      {wlB > 0 ? (//Bホワイトリスト所有確認
                         <>
                       {data.wlSaleStart_B ? (//セールB開始確認
                       <>
-                      {mintedWlB > 0 ? (
+                      {mintedWlB >= wlB ? (
                       <>
+                      <s.SpacerMedium />
+
+                        <s.Container ai={"center"} jc={"center"} fd={"row"}>
                           <StyledButtonB
                             disabled={1}//claimingNftPsがtrueなら disabledを表示させる。＝クリックできない
                             onClick={(e) => {
@@ -636,10 +739,65 @@ function App() {
                           >
                             {"B.mint 済" }
                           </StyledButtonB>
+                          </s.Container>
                       </>
                       ) : (
                         <>
-                      <StyledButtonB
+                        {wlB > 1 ? (//mint可能数が一個以上の場合個数選択可能に
+                      <>
+                            <s.SpacerMedium />
+                            <s.Container>
+                            <s.Container ai={"center"} jc={"center"} fd={"row"}>
+
+                            <s.TextTitle
+                              style={{ textAlign: "center", color: "var(--accent-text)" }}
+                            >
+                              {"mintB("}{mintedWlB}{"mint済)"}
+                            </s.TextTitle>
+                            </s.Container>
+
+                            <s.Container ai={"center"} jc={"center"} fd={"row"}>
+                            <s.SpacerXSmall />
+                              <StyledRoundButton
+                                style={{ lineHeight: 0.4 }}
+                                disabled={claimingNft ? 1 : 0}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  decrementMintAmountB();
+                                }}
+                              >
+                                -
+                              </StyledRoundButton>
+                              <s.SpacerMedium />
+                              <s.TextDescription
+                                style={{
+                                  textAlign: "center",
+                                  color: "var(--accent-text)",
+                                }}
+                              >
+                                {mintAmountB}
+                              </s.TextDescription>
+                              <s.SpacerMedium />
+                              <StyledRoundButton
+                                disabled={claimingNft ? 1 : 0}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  incrementMintAmountB();
+                                }}
+                              >
+                                +
+                              </StyledRoundButton>
+                              </s.Container>
+                              </s.Container>
+                            <s.SpacerSmall />
+                        </>
+                        ) : (
+                          <>
+                          </>
+                        )}
+                          <s.Container ai={"center"} jc={"center"} fd={"row"}>
+
+                        <StyledButtonB
                         disabled={claimingNft ? 1  : 0}//claimingNftPsがtrueなら disabledを表示させる。＝クリックできない
                         onClick={(e) => {
                           e.preventDefault();
@@ -647,20 +805,36 @@ function App() {
                           getData();
                         }}
                       >
-                        {claimingNft ? "生産中" : "freeミント B"}
-                      </StyledButtonB>    
+                        {claimingNft ? "生産中" : "ミント B"}
+                      </StyledButtonB>
+                      </s.Container>
+
                         </>
                       )}                  
                       </>
                       ) : (
                       <>
+                      <s.Container ai={"center"} jc={"center"} fd={"row"}>
+
                       <s.TextDescription
                           style={{
                             color: "var(--accent-text)",
                           }}
                         >
-                        {"FREE_B.ComingSoon."}
+                        {"WL_Bに登録されています。"}
                         </s.TextDescription>
+                        </s.Container>
+                        <s.Container ai={"center"} jc={"center"} fd={"row"}>
+
+                      <s.TextDescription
+                          style={{
+                            color: "var(--accent-text)",
+                          }}
+                        >
+                        {"ComingSoon."}
+                        </s.TextDescription>
+                        </s.Container>
+
                       </>
                       )
                       }                        
@@ -676,6 +850,10 @@ function App() {
                         <>
                         {minted > 1 ? (
                           <>
+                          <s.SpacerMedium />
+
+                          <s.Container ai={"center"} jc={"center"} fd={"row"}>
+
                           <StyledButtonPS
                             disabled={1}//claimingNftPsがtrueなら disabledを表示させる。＝クリックできない
                             onClick={(e) => {
@@ -684,6 +862,8 @@ function App() {
                           >
                             {"PS.mint 済" }
                           </StyledButtonPS>
+                          </s.Container>
+
                           </>
                         ) : (
                           <>
@@ -698,7 +878,6 @@ function App() {
                             </s.TextTitle>
                             </s.Container>
                             <s.Container ai={"center"} jc={"center"} fd={"row"}>
-
                             <s.SpacerXSmall />
                               <StyledRoundButton
                                 style={{ lineHeight: 0.4 }}
@@ -744,6 +923,12 @@ function App() {
                               {claimingNft ? "生産中" : "ミント PS"}
                               </StyledButtonPS>
                             </s.Container>
+                            {minted > 0 ? (
+                                <>
+                                </>                              
+                            ):(
+                            <></>
+                            )}
                           </>
                         )}
                         </>
@@ -762,7 +947,35 @@ function App() {
                         </>
                       )}
                       {/* PSここまで */}
+                      {minted > 0 || mintedWlA > 0 || mintedWlB > 0 ? (
+                        <>
+                          <s.SpacerMedium />
+                              <s.Container ai={"center"} jc={"center"} fd={"row"}>
+                                <StyledLink target={"_blank"} href={"https://arweave.net/M5jd4be7U2D1_vwxdp_lSEOyCewJSnE-RlNInWVaMlw"} download={"welcometoOnikon.wav"}>
+                                  アンロッカブル[音源]直リンク
+                                </StyledLink>
+                                </s.Container>
+                                <s.Container ai={"center"} jc={"center"} fd={"row"}>
+                                <s.TextDescription
+                          style={{
+                            color: "var(--accent-text)",
+                          }}
+                        >
+                        {"ダウンロードはこちらから👇"}
+                        </s.TextDescription>
+                        </s.Container>
+                                <s.Container ai={"center"} jc={"center"} fd={"row"}>
 
+                                <StyledButtonUnlock
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClick('https://arweave.net/M5jd4be7U2D1_vwxdp_lSEOyCewJSnE-RlNInWVaMlw', 'welcometoOnikon.wav');
+                                }}
+                              >
+                              download</StyledButtonUnlock>
+                              </s.Container>
+                        </>
+                      ) : (<></>)}
                     </s.Container>
                   </>
                 )}

@@ -31,6 +31,20 @@ const updateAccountRequest = (payload) => {
   };
 };
 
+const changeWalletRequest = (payload) => {
+  const { ethereum } = window;
+
+  return ethereum.request({
+    method: "wallet_switchEthereumChain",
+    params: [{
+      chainId: CONFIG.NETWORK.ID,
+    }]
+  }).then(() => {
+    alert('Network has been changed. Please reconnect your wallet.')
+  });
+};
+
+
 export const connect = () => {
   return async (dispatch) => {
     dispatch(connectRequest());
@@ -81,7 +95,42 @@ export const connect = () => {
           });
           // Add listeners end
         } else {
-          dispatch(connectFailed(`Change network to ${CONFIG.NETWORK.NAME}.`));
+
+          //ネットワーク切り替え部分
+          try {
+            // check if the chain to connect to is installed
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              // params: [{ chainId: '0x1' }], // イーサチェーンのID（16進数）
+              // params: [{ chainId: '0x4' }], // rinkebyのID（16進数）
+              params: [{ chainId: '0x89' }], // polygonMainのID（16進数）
+            });
+          } catch (error) {
+            // エラーの場合、チェーン追加を試みる
+            if (error.code === 4902) {
+              try {
+                await window.ethereum.request({
+                  method: 'wallet_addEthereumChain',
+                  params: [
+                    {
+                      // chainId: '0x1', //イーサ
+                      // chainId: '0x4', //rinkeby
+                      chainId: '0x89', //polygonMain
+                      // rpcUrl: 'https://mainnet-infura.brave.com/',
+                    },
+                  ],
+                });
+              } catch (addError) {
+                console.error(addError);
+              }
+            }
+            console.error(error);
+          }
+          // dispatch(connectFailed(`Change network to ${CONFIG.NETWORK.NAME}.`)); //コメントアウト
+          alert('ネットワークを切り替えました。もう一度CONNECTしてみてください。'); //アラート表示
+          dispatch(connectFailed(`もう一度CONNECTしてみてください。`)); //メッセ表示
+          //ネットワーク切り替え部分終了
+
         }
       } catch (err) {
         dispatch(connectFailed("Something went wrong."));

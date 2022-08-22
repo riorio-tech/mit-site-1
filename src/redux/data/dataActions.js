@@ -27,7 +27,7 @@ export const fetchData = (account) => {
     try {
       let totalSupply = await store
         .getState()
-        .blockchain.smartContract.methods.totalSupply()
+        .blockchain.smartContract.methods.tokenCount()
         .call();
         let wlSaleStart_A = await store
         .getState()
