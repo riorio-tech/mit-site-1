@@ -4,9 +4,8 @@ import { connect } from "./redux/blockchain/blockchainActions";
 import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
-import { AudioPlayer } from "./AudioPlayer";
-import axios from 'axios';
-import fileDownload from 'js-file-download';
+
+
 
 const truncate = (input, len) =>
   input.length > len ? `${input.substring(0, len)}...` : input;
@@ -227,8 +226,11 @@ function App() {
     })
   }
 
+
+
+  
   const claimNFTsA = () => {
-    let cost = 0;//価格を０に。0714(ふりっきー)
+    let cost = 0.008;//価格を０に。0714(ふりっきー)
     let amount = wlA;
     let gasLimit = CONFIG.GAS_LIMIT;
     let totalCostWei = String(cost * amount);//個数を２に固定0714(ふりっきー)
@@ -489,7 +491,7 @@ function App() {
         <s.SpacerSmall />
         <ResponsiveWrapper flex={1} style={{ padding: 24 }} test>
           <s.Container flex={1} jc={"center"} ai={"center"}>
-            <StyledImg alt={"example"} src={"/config/images/example.gif"} />
+            <StyledImg alt={"example"} src={"/config/images/example.png"} />
           </s.Container>
           <s.SpacerLarge />
           <s.Container
@@ -513,11 +515,6 @@ function App() {
               }}
             >
                               <s.SpacerXSmall />
-                <s.TextDescription
-                  style={{ textAlign: "center", color: "var(--accent-text)" }}
-                >
-                      <AudioPlayer></AudioPlayer>
-                </s.TextDescription>
 
 
               {data.totalSupply} / {CONFIG.MAX_SUPPLY}
@@ -987,7 +984,7 @@ function App() {
           <s.Container flex={1} jc={"center"} ai={"center"}>
             <StyledImg
               alt={"example"}
-              src={"/config/images/example.gif"}
+              src={"/config/images/example.png"}
               style={{ transform: "scaleX(-1)" }}
             />
           </s.Container>
